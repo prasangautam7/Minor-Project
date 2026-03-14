@@ -1,0 +1,955 @@
+{
+    "record_start": 76015.0,
+    "awake_intervals": [
+        [
+            76497.0,
+            76628.0
+        ],
+        [
+            77517.0,
+            77575.0
+        ],
+        [
+            77611.0,
+            77761.0
+        ],
+        [
+            78115.0,
+            78146.0
+        ],
+        [
+            78777.0,
+            78851.0
+        ],
+        [
+            81535.0,
+            85145.0
+        ],
+        [
+            90507.0,
+            90538.0
+        ],
+        [
+            91046.0,
+            91080.0
+        ],
+        [
+            91410.0,
+            91465.0
+        ],
+        [
+            91565.0,
+            91590.0
+        ],
+        [
+            91713.0,
+            91742.0
+        ],
+        [
+            93027.0,
+            93060.0
+        ],
+        [
+            93477.0,
+            93506.0
+        ],
+        [
+            94437.0,
+            94465.0
+        ],
+        [
+            94628.0,
+            94679.0
+        ],
+        [
+            94945.0,
+            94980.0
+        ],
+        [
+            96567.0,
+            96595.0
+        ],
+        [
+            96955.0,
+            96988.0
+        ],
+        [
+            97046.0,
+            97078.0
+        ],
+        [
+            97107.0,
+            99535.0
+        ],
+        [
+            100021.0,
+            100045.0
+        ],
+        [
+            100410.0,
+            100437.0
+        ],
+        [
+            103615.0,
+            103652.0
+        ],
+        [
+            104372.0,
+            104401.0
+        ],
+        [
+            104616.0,
+            104641.0
+        ],
+        [
+            105455.0,
+            105480.0
+        ],
+        [
+            105575.0,
+            105598.0
+        ],
+        [
+            105900.0,
+            105934.0
+        ],
+        [
+            106196.0,
+            106244.0
+        ],
+        [
+            106347.0,
+            106398.0
+        ],
+        [
+            106768.0,
+            106797.0
+        ],
+        [
+            108242.0,
+            108275.0
+        ],
+        [
+            109650.0,
+            114626.0
+        ]
+    ],
+    "events": [
+        {
+            "event_type": "osa",
+            "evnet_start": 76819.0,
+            "event_duration": 11.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 76847.0,
+            "event_duration": 16.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 76883.0,
+            "event_duration": 18.8,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 76933.0,
+            "event_duration": 10.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 76961.0,
+            "event_duration": 20.1,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 77001.0,
+            "event_duration": 26.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 77048.0,
+            "event_duration": 26.8,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 77095.0,
+            "event_duration": 15.6,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 77132.0,
+            "event_duration": 24.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 77286.0,
+            "event_duration": 22.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 77346.0,
+            "event_duration": 17.8,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 77442.0,
+            "event_duration": 11.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 77497.0,
+            "event_duration": 14.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 77530.0,
+            "event_duration": 18.4,
+            "sleep_stage": "W"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 77590.0,
+            "event_duration": 12.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 77737.0,
+            "event_duration": 25.0,
+            "sleep_stage": "W"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 77783.0,
+            "event_duration": 12.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 77943.0,
+            "event_duration": 25.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 77994.0,
+            "event_duration": 26.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 78046.0,
+            "event_duration": 23.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 78190.0,
+            "event_duration": 23.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 78230.0,
+            "event_duration": 28.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 78276.0,
+            "event_duration": 32.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 78328.0,
+            "event_duration": 31.4,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 78554.0,
+            "event_duration": 25.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 78690.0,
+            "event_duration": 32.8,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 78926.0,
+            "event_duration": 12.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 78947.0,
+            "event_duration": 19.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 79158.0,
+            "event_duration": 33.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 79390.0,
+            "event_duration": 38.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 79446.0,
+            "event_duration": 37.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 79956.0,
+            "event_duration": 42.2,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 80016.0,
+            "event_duration": 36.5,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 80073.0,
+            "event_duration": 42.4,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 80131.0,
+            "event_duration": 40.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 80195.0,
+            "event_duration": 47.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 80397.0,
+            "event_duration": 43.8,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 80651.0,
+            "event_duration": 37.5,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 80708.0,
+            "event_duration": 40.4,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 80768.0,
+            "event_duration": 32.8,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 80822.0,
+            "event_duration": 43.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 81054.0,
+            "event_duration": 29.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 81230.0,
+            "event_duration": 39.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 81291.0,
+            "event_duration": 39.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 81393.0,
+            "event_duration": 10.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 81470.0,
+            "event_duration": 23.4,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 86547.0,
+            "event_duration": 35.4,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 86794.0,
+            "event_duration": 45.7,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 86924.0,
+            "event_duration": 38.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 87126.0,
+            "event_duration": 43.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 87327.0,
+            "event_duration": 48.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 87397.0,
+            "event_duration": 27.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 87434.0,
+            "event_duration": 27.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 87477.0,
+            "event_duration": 46.1,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 87604.0,
+            "event_duration": 45.5,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 87675.0,
+            "event_duration": 42.8,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 87964.0,
+            "event_duration": 45.5,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 88035.0,
+            "event_duration": 49.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 88250.0,
+            "event_duration": 53.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 88400.0,
+            "event_duration": 49.8,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 88472.0,
+            "event_duration": 51.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 88694.0,
+            "event_duration": 53.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 88772.0,
+            "event_duration": 90.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 88884.0,
+            "event_duration": 73.0,
+            "sleep_stage": "R"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 89302.0,
+            "event_duration": 58.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 90295.0,
+            "event_duration": 20.7,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 90343.0,
+            "event_duration": 22.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 91182.0,
+            "event_duration": 35.7,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 91310.0,
+            "event_duration": 34.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 91362.0,
+            "event_duration": 35.7,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 91772.0,
+            "event_duration": 26.4,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 92589.0,
+            "event_duration": 39.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 92649.0,
+            "event_duration": 42.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 92939.0,
+            "event_duration": 41.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 93007.0,
+            "event_duration": 40.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 93151.0,
+            "event_duration": 42.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 93221.0,
+            "event_duration": 46.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 94038.0,
+            "event_duration": 42.8,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 94260.0,
+            "event_duration": 43.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 94324.0,
+            "event_duration": 46.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 94391.0,
+            "event_duration": 49.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 94476.0,
+            "event_duration": 50.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 94679.0,
+            "event_duration": 15.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 94726.0,
+            "event_duration": 24.4,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 95341.0,
+            "event_duration": 47.5,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 95562.0,
+            "event_duration": 50.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 96423.0,
+            "event_duration": 92.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 97036.0,
+            "event_duration": 14.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 99532.0,
+            "event_duration": 16.4,
+            "sleep_stage": "W"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 99589.0,
+            "event_duration": 17.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 99632.0,
+            "event_duration": 19.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 99678.0,
+            "event_duration": 17.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 99728.0,
+            "event_duration": 25.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 100116.0,
+            "event_duration": 37.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 101581.0,
+            "event_duration": 43.8,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 101645.0,
+            "event_duration": 52.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 101861.0,
+            "event_duration": 42.8,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 101924.0,
+            "event_duration": 44.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 102285.0,
+            "event_duration": 47.5,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 102351.0,
+            "event_duration": 43.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 102418.0,
+            "event_duration": 50.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 102489.0,
+            "event_duration": 43.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 102552.0,
+            "event_duration": 52.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 103004.0,
+            "event_duration": 77.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 103514.0,
+            "event_duration": 16.8,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 103556.0,
+            "event_duration": 12.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 103652.0,
+            "event_duration": 18.4,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 103974.0,
+            "event_duration": 19.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 104015.0,
+            "event_duration": 19.5,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 104054.0,
+            "event_duration": 40.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 104110.0,
+            "event_duration": 38.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 105538.0,
+            "event_duration": 31.4,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 105638.0,
+            "event_duration": 13.7,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 106101.0,
+            "event_duration": 26.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 106374.0,
+            "event_duration": 31.8,
+            "sleep_stage": "W"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 106427.0,
+            "event_duration": 33.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 106490.0,
+            "event_duration": 30.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 106544.0,
+            "event_duration": 34.8,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 106604.0,
+            "event_duration": 36.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 106662.0,
+            "event_duration": 43.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 106794.0,
+            "event_duration": 26.8,
+            "sleep_stage": "W"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 106840.0,
+            "event_duration": 37.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 106968.0,
+            "event_duration": 28.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 107010.0,
+            "event_duration": 31.4,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 107129.0,
+            "event_duration": 35.5,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 107251.0,
+            "event_duration": 40.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 107383.0,
+            "event_duration": 39.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 107583.0,
+            "event_duration": 38.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 107647.0,
+            "event_duration": 43.8,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 107714.0,
+            "event_duration": 35.7,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 107785.0,
+            "event_duration": 28.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 107838.0,
+            "event_duration": 36.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 108033.0,
+            "event_duration": 39.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 108090.0,
+            "event_duration": 19.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 108336.0,
+            "event_duration": 21.7,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 109603.0,
+            "event_duration": 27.0,
+            "sleep_stage": "N1"
+        }
+    ]
+}

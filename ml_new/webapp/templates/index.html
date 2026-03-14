@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sleep Apnea Detection | AI-Powered Analysis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="app">
+    <!-- Animated Background -->
+    <div class="bg-gradient"></div>
+    <div class="bg-pattern"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-brand">
+        <i class="fas fa-lungs pulse-icon"></i>
+        <span>SleepApnea<strong>AI</strong></span>
+      </div>
+      <div class="nav-links">
+        <a href="#" class="active">Home</a>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <i class="fas fa-brain"></i>
+          Machine Learning Powered
+        </div>
+        <h1>Sleep Apnea <span class="gradient-text">Detection</span></h1>
+        <p class="hero-subtitle">
+          Advanced AI analysis of heart rate and SpO2 data to detect sleep apnea events, 
+          assess severity, and provide actionable insights for better sleep health.
+        </p>
+        
+        <!-- Upload Card -->
+        <div class="upload-card">
+          <form action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data" id="uploadForm">
+            <div class="upload-zone" id="dropZone">
+              <div class="upload-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+              </div>
+              <h3>Upload Your Data</h3>
+              <p>Drag & drop your CSV file or click to browse</p>
+              <input type="file" name="data_file" id="fileInput" accept=".csv" required hidden />
+              <button type="button" class="btn btn-outline" onclick="document.getElementById('fileInput').click()">
+                <i class="fas fa-folder-open"></i> Choose File
+              </button>
+              <div class="file-info" id="fileInfo"></div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn" disabled>
+              <i class="fas fa-microscope"></i> Analyze Data
+              <div class="btn-shine"></div>
+            </button>
+          </form>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="alert alert-error">
+              <i class="fas fa-exclamation-circle"></i>
+              {{ messages[0] }}
+            </div>
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <div class="hero-visual">
+        <div class="visual-card">
+          <div class="ecg-line">
+            <svg viewBox="0 0 400 100" preserveAspectRatio="none">
+              <path class="ecg-path" d="M0,50 L40,50 L50,50 L60,20 L70,80 L80,50 L100,50 L140,50 L150,50 L160,20 L170,80 L180,50 L200,50 L240,50 L250,50 L260,20 L270,80 L280,50 L300,50 L340,50 L350,50 L360,20 L370,80 L380,50 L400,50" fill="none" stroke="url(#ecgGradient)" stroke-width="2"/>
+              <defs>
+                <linearGradient id="ecgGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:#3b82f6"/>
+                  <stop offset="50%" style="stop-color:#8b5cf6"/>
+                  <stop offset="100%" style="stop-color:#06b6d4"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div class="stats-preview">
+            <div class="stat-item">
+              <span class="stat-value">83%</span>
+              <span class="stat-label">Accuracy</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">0.89</span>
+              <span class="stat-label">AUC-ROC</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">50</span>
+              <span class="stat-label">Patients</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+      <h2 class="section-title">Powerful <span class="gradient-text">Features</span></h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon blue">
+            <i class="fas fa-heartbeat"></i>
+          </div>
+          <h3>Dual-Signal Detection</h3>
+          <p>Analyze heart rate and SpO2 patterns together to identify apnea events with high precision using machine learning.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon purple">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <h3>Severity Assessment</h3>
+          <p>Calculate AHI (Apnea-Hypopnea Index) and classify severity from mild to severe.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon cyan">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <h3>Visual Analytics</h3>
+          <p>Interactive dashboards with time-series plots, probability charts, and metrics visualization.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon green">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3>Validated Model</h3>
+          <p>Trained on 50 clinical patients with 83% accuracy, 0.89 AUC-ROC using Random Forest with 19 engineered features.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+      <h2 class="section-title">How It <span class="gradient-text">Works</span></h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Upload Data</h3>
+            <p>Upload a CSV file with heart rate (BPM) and SpO2 measurements per second or per minute.</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>AI Analysis</h3>
+            <p>Our Random Forest model extracts 19 clinical features from 60-second windows and predicts apnea probability.</p>
+          </div>
+        </div>
+        <div class="step-connector"></div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Get Results</h3>
+            <p>View detailed dashboard with severity, visualizations, and insights.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sample Data -->
+    <section class="sample-section">
+      <div class="sample-card">
+        <div class="sample-header">
+          <i class="fas fa-file-csv"></i>
+          <h3>Required CSV Format</h3>
+        </div>
+        <p style="color: var(--gray-400); font-size: 0.9rem; margin-bottom: 1rem;">
+          <strong style="color: var(--secondary);">Per-second data (recommended):</strong>
+        </p>
+        <pre><code>second,heart_rate_bpm,spo2
+0,68,81
+1,69,81
+2,69,80
+3,70,79
+4,72,78
+5,74,80
+...</code></pre>
+        <p style="color: var(--gray-400); font-size: 0.9rem; margin: 1rem 0 0.5rem;">
+          <strong style="color: var(--gray-300);">Per-minute data (also supported):</strong>
+        </p>
+        <pre><code>minute,heart_rate_bpm,spo2
+0,67,97
+1,71,96
+2,74,94
+3,80,91
+...</code></pre>
+        <div class="hint-box">
+          <p class="hint hint-important">
+            <i class="fas fa-lungs"></i>
+            <strong>Required:</strong> Both <code>heart_rate_bpm</code> AND <code>spo2</code> columns are needed.
+            The model uses 19 features from HR variability, SpO2 desaturations, and their cross-correlation.
+          </p>
+          <p class="hint">
+            <i class="fas fa-info-circle"></i>
+            Optional: Add a <code>label</code> column (0=Normal, 1=Apnea) to see accuracy metrics.
+          </p>
+          <a href="{{ url_for('download_sample') }}" class="btn btn-outline" style="margin-top: 1rem; color: var(--secondary); border-color: var(--secondary); display: inline-flex;">
+            <i class="fas fa-download"></i> Download Sample Dataset (Patient 35 - 2hr excerpt)
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <i class="fas fa-lungs"></i>
+          <span>SleepApnea<strong>AI</strong></span>
+        </div>
+        <p>Final Year Project | Machine Learning for Healthcare</p>
+        <p class="footer-tech">
+          <span><i class="fab fa-python"></i> Python</span>
+          <span><i class="fas fa-flask"></i> Flask</span>
+          <span><i class="fas fa-robot"></i> Random Forest</span>
+        </p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+
+    // Drag and drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      if (files.length) {
+        fileInput.files = files;
+        handleFile(files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (file.name.endsWith('.csv')) {
+        fileInfo.innerHTML = `<i class="fas fa-check-circle"></i> ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+        fileInfo.classList.add('success');
+        analyzeBtn.disabled = false;
+      } else {
+        fileInfo.innerHTML = `<i class="fas fa-times-circle"></i> Please select a CSV file`;
+        fileInfo.classList.remove('success');
+        analyzeBtn.disabled = true;
+      }
+    }
+  </script>
+</body>
+</html>

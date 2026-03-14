@@ -1,0 +1,381 @@
+{
+    "record_start": 76835.0,
+    "awake_intervals": [
+        [
+            80915.0,
+            80946.0
+        ],
+        [
+            83380.0,
+            83449.0
+        ],
+        [
+            84759.0,
+            84798.0
+        ],
+        [
+            94566.0,
+            94595.0
+        ],
+        [
+            95500.0,
+            95594.0
+        ],
+        [
+            107140.0,
+            107167.0
+        ],
+        [
+            107886.0,
+            107984.0
+        ],
+        [
+            108067.0,
+            108374.0
+        ],
+        [
+            112777.0,
+            112844.0
+        ],
+        [
+            113467.0,
+            113495.0
+        ],
+        [
+            113802.0,
+            114871.0
+        ]
+    ],
+    "events": [
+        {
+            "event_type": "hypo",
+            "evnet_start": 80938.0,
+            "event_duration": 39.5,
+            "sleep_stage": "W"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 81104.0,
+            "event_duration": 38.5,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 81159.0,
+            "event_duration": 20.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 81328.0,
+            "event_duration": 20.5,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 81454.0,
+            "event_duration": 23.2,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 82380.0,
+            "event_duration": 26.0,
+            "sleep_stage": "N3"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 82458.0,
+            "event_duration": 22.7,
+            "sleep_stage": "N3"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 83313.0,
+            "event_duration": 23.2,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 83419.0,
+            "event_duration": 26.8,
+            "sleep_stage": "W"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 83490.0,
+            "event_duration": 27.0,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 83535.0,
+            "event_duration": 28.7,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 83615.0,
+            "event_duration": 38.9,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 84705.0,
+            "event_duration": 18.6,
+            "sleep_stage": "R"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 86095.0,
+            "event_duration": 20.7,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 86346.0,
+            "event_duration": 34.0,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 86769.0,
+            "event_duration": 22.1,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 87069.0,
+            "event_duration": 21.9,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 87341.0,
+            "event_duration": 29.5,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 88068.0,
+            "event_duration": 23.0,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 89209.0,
+            "event_duration": 31.8,
+            "sleep_stage": "R"
+        },
+        {
+            "event_type": "osa",
+            "evnet_start": 89260.0,
+            "event_duration": 15.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 89538.0,
+            "event_duration": 18.0,
+            "sleep_stage": "R"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 89916.0,
+            "event_duration": 20.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 91082.0,
+            "event_duration": 19.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 91127.0,
+            "event_duration": 12.7,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 91713.0,
+            "event_duration": 18.9,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 91755.0,
+            "event_duration": 16.2,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 93569.0,
+            "event_duration": 12.3,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 94564.0,
+            "event_duration": 18.4,
+            "sleep_stage": "N3"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 94610.0,
+            "event_duration": 30.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 95147.0,
+            "event_duration": 24.8,
+            "sleep_stage": "R"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 95310.0,
+            "event_duration": 24.2,
+            "sleep_stage": "R"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 95472.0,
+            "event_duration": 14.5,
+            "sleep_stage": "R"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 95508.0,
+            "event_duration": 20.3,
+            "sleep_stage": "W"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 99974.0,
+            "event_duration": 19.5,
+            "sleep_stage": "R"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 101401.0,
+            "event_duration": 14.5,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 101750.0,
+            "event_duration": 20.3,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 103739.0,
+            "event_duration": 29.3,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 104179.0,
+            "event_duration": 17.6,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 104825.0,
+            "event_duration": 21.9,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 104895.0,
+            "event_duration": 26.2,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 105560.0,
+            "event_duration": 19.1,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 107153.0,
+            "event_duration": 19.5,
+            "sleep_stage": "W"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 107407.0,
+            "event_duration": 15.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 110853.0,
+            "event_duration": 16.2,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 111041.0,
+            "event_duration": 17.6,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 111179.0,
+            "event_duration": 14.3,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 112469.0,
+            "event_duration": 25.6,
+            "sleep_stage": "R"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 112761.0,
+            "event_duration": 20.9,
+            "sleep_stage": "R"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 112937.0,
+            "event_duration": 13.9,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 113388.0,
+            "event_duration": 12.9,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 113453.0,
+            "event_duration": 17.2,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 113602.0,
+            "event_duration": 20.3,
+            "sleep_stage": "N2"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 113700.0,
+            "event_duration": 20.5,
+            "sleep_stage": "N1"
+        },
+        {
+            "event_type": "hypo",
+            "evnet_start": 113748.0,
+            "event_duration": 29.9,
+            "sleep_stage": "N1"
+        }
+    ]
+}

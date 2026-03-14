@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analysis Results | Sleep Apnea Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body class="dashboard-page">
+  <div class="app">
+    <div class="bg-gradient"></div>
+
+    <!-- Dashboard Header -->
+    <header class="dashboard-header">
+      <div class="header-left">
+        <a href="{{ url_for('index') }}" class="back-btn">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <div class="header-title">
+          <i class="fas fa-lungs pulse-icon"></i>
+          <h1>Analysis Dashboard</h1>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="model-badge">
+          <i class="fas fa-robot"></i>
+          {{ model_name }}
+        </div>
+        {% if has_spo2 %}
+        <div class="data-badge spo2">
+          <i class="fas fa-lungs"></i>
+          HR + SpO2
+        </div>
+        {% else %}
+        <div class="data-badge hr-only">
+          <i class="fas fa-heartbeat"></i>
+          HR Only
+        </div>
+        {% endif %}
+        <a href="{{ url_for('index') }}" class="btn btn-outline btn-sm">
+          <i class="fas fa-plus"></i> New Analysis
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+      {% if not has_spo2 %}
+      <!-- Warning: No SpO2 Data -->
+      <section class="warning-banner">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+          <strong>Limited Detection Mode:</strong> No SpO2 (oxygen) data provided. 
+          For accurate apnea detection, include both heart rate AND SpO2 measurements. 
+          Sleep apnea is detected by the relationship between oxygen drops and heart rate changes.
+        </div>
+      </section>
+      {% endif %}
+
+      <!-- Top Stats Cards -->
+      <section class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ total_minutes }}</span>
+            <span class="stat-label">Total Minutes</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon red">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ apnea_minutes }}</span>
+            <span class="stat-label">Apnea Events</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon purple">
+            <i class="fas fa-percentage"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ "%.1f"|format(apnea_percent) }}%</span>
+            <span class="stat-label">Apnea Rate</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon {{ 'green' if severity == 'Normal / None' else 'yellow' if severity == 'Mild' else 'orange' if severity == 'Moderate' else 'red' }}">
+            <i class="fas fa-heartbeat"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ "%.1f"|format(ahi) }}</span>
+            <span class="stat-label">AHI Score</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Severity Banner -->
+      <section class="severity-banner severity-{{ severity.lower().replace(' ', '-').replace('/', '-') }}">
+        <div class="severity-content">
+          <div class="severity-indicator">
+            <div class="severity-icon">
+              {% if severity == 'Normal / None' %}
+                <i class="fas fa-check-circle"></i>
+              {% elif severity == 'Mild' %}
+                <i class="fas fa-info-circle"></i>
+              {% elif severity == 'Moderate' %}
+                <i class="fas fa-exclamation-circle"></i>
+              {% else %}
+                <i class="fas fa-times-circle"></i>
+              {% endif %}
+            </div>
+            <div class="severity-text">
+              <h2>{{ severity }} Sleep Apnea</h2>
+              <p>Based on Apnea-Hypopnea Index (AHI) of {{ "%.1f"|format(ahi) }} events/hour</p>
+            </div>
+          </div>
+          <div class="severity-scale">
+            <div class="scale-bar">
+              <div class="scale-fill" style="width: {{ [ahi / 40 * 100, 100] | min }}%"></div>
+              <div class="scale-marker" style="left: {{ [ahi / 40 * 100, 100] | min }}%"></div>
+            </div>
+            <div class="scale-labels">
+              <span>Normal<br>&lt;5</span>
+              <span>Mild<br>5-15</span>
+              <span>Moderate<br>15-30</span>
+              <span>Severe<br>&gt;30</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts Grid -->
+      <section class="charts-grid">
+        <!-- Time Series Chart -->
+        <div class="chart-card full-width">
+          <div class="chart-header">
+            <h3><i class="fas fa-wave-square"></i> Heart Rate Analysis</h3>
+            <span class="chart-subtitle">Red zones indicate predicted apnea events</span>
+          </div>
+          <div class="chart-body">
+            <img src="data:image/png;base64,{{ ts_img }}" alt="Time series" class="chart-img" />
+          </div>
+        </div>
+
+        <!-- Probability Chart -->
+        <div class="chart-card full-width">
+          <div class="chart-header">
+            <h3><i class="fas fa-chart-area"></i> Apnea Probability</h3>
+            <span class="chart-subtitle">Continuous probability score over time</span>
+          </div>
+          <div class="chart-body">
+            <img src="data:image/png;base64,{{ prob_img }}" alt="Probability" class="chart-img" />
+          </div>
+        </div>
+
+        <!-- Interactive Charts -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3><i class="fas fa-chart-pie"></i> Prediction Distribution</h3>
+          </div>
+          <div class="chart-body">
+            <canvas id="predPieChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3><i class="fas fa-chart-bar"></i> Classification Results</h3>
+          </div>
+          <div class="chart-body">
+            <canvas id="predBarChart"></canvas>
+          </div>
+        </div>
+
+        {% if metrics %}
+        <!-- Metrics Cards -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3><i class="fas fa-bullseye"></i> Model Performance</h3>
+            <span class="chart-subtitle">Compared with ground truth labels</span>
+          </div>
+          <div class="chart-body">
+            <canvas id="metricsRadar"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card metrics-detail">
+          <div class="chart-header">
+            <h3><i class="fas fa-tachometer-alt"></i> Metrics Detail</h3>
+          </div>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <div class="metric-circle accuracy">
+                <svg viewBox="0 0 36 36">
+                  <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="circle-fill" stroke-dasharray="{{ (metrics.accuracy * 100)|round }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <span class="metric-value">{{ "%.1f"|format(metrics.accuracy * 100) }}%</span>
+              </div>
+              <span class="metric-label">Accuracy</span>
+            </div>
+            <div class="metric-item">
+              <div class="metric-circle precision">
+                <svg viewBox="0 0 36 36">
+                  <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="circle-fill" stroke-dasharray="{{ (metrics.precision * 100)|round }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <span class="metric-value">{{ "%.1f"|format(metrics.precision * 100) }}%</span>
+              </div>
+              <span class="metric-label">Precision</span>
+            </div>
+            <div class="metric-item">
+              <div class="metric-circle recall">
+                <svg viewBox="0 0 36 36">
+                  <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="circle-fill" stroke-dasharray="{{ (metrics.recall * 100)|round }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <span class="metric-value">{{ "%.1f"|format(metrics.recall * 100) }}%</span>
+              </div>
+              <span class="metric-label">Recall</span>
+            </div>
+            <div class="metric-item">
+              <div class="metric-circle f1">
+                <svg viewBox="0 0 36 36">
+                  <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="circle-fill" stroke-dasharray="{{ (metrics.f1 * 100)|round }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <span class="metric-value">{{ "%.1f"|format(metrics.f1 * 100) }}%</span>
+              </div>
+              <span class="metric-label">F1-Score</span>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="chart-card info-card">
+          <div class="info-content">
+            <i class="fas fa-info-circle"></i>
+            <h3>Want to see model metrics?</h3>
+            <p>Upload a CSV with a <code>label</code> column containing ground truth (0=Normal, 1=Apnea) to view Accuracy, Precision, Recall, and F1-Score.</p>
+          </div>
+        </div>
+        {% endif %}
+      </section>
+
+      <!-- Footer Actions -->
+      <section class="dashboard-footer">
+        <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+          <i class="fas fa-redo"></i> Analyze Another File
+        </a>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Prediction Pie Chart
+    new Chart(document.getElementById('predPieChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Normal', 'Apnea'],
+        datasets: [{
+          data: [{{ pred_counts.normal }}, {{ pred_counts.apnea }}],
+          backgroundColor: ['#10b981', '#ef4444'],
+          borderWidth: 0,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '65%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              usePointStyle: true,
+              font: { size: 13, family: 'Inter' }
+            }
+          }
+        }
+      }
+    });
+
+    // Prediction Bar Chart
+    new Chart(document.getElementById('predBarChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Normal', 'Apnea'],
+        datasets: [{
+          label: 'Minutes',
+          data: [{{ pred_counts.normal }}, {{ pred_counts.apnea }}],
+          backgroundColor: ['rgba(16, 185, 129, 0.8)', 'rgba(239, 68, 68, 0.8)'],
+          borderRadius: 8,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+
+    {% if metrics %}
+    // Metrics Radar Chart
+    new Chart(document.getElementById('metricsRadar'), {
+      type: 'radar',
+      data: {
+        labels: ['Accuracy', 'Precision', 'Recall', 'F1-Score'],
+        datasets: [{
+          label: 'Score',
+          data: [
+            {{ (metrics.accuracy * 100)|round(1) }},
+            {{ (metrics.precision * 100)|round(1) }},
+            {{ (metrics.recall * 100)|round(1) }},
+            {{ (metrics.f1 * 100)|round(1) }}
+          ],
+          fill: true,
+          backgroundColor: 'rgba(99, 102, 241, 0.2)',
+          borderColor: 'rgba(99, 102, 241, 1)',
+          pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: 'rgba(99, 102, 241, 1)',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 100,
+            ticks: { stepSize: 25 },
+            grid: { color: 'rgba(0,0,0,0.08)' },
+            pointLabels: { font: { size: 12, family: 'Inter' } }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+    {% endif %}
+  </script>
+</body>
+</html>
