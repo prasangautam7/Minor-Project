@@ -246,7 +246,9 @@ def create_windows_and_predict(df, model):
     hr = pd.to_numeric(df["heart_rate_bpm"], errors="coerce").values.astype(float)
     spo2 = (pd.to_numeric(df["spo2"], errors="coerce").values.astype(float)
             if "spo2" in df.columns else np.full(len(df), np.nan))
-    times = pd.to_numeric(df["time"], errors="coerce").interpolate(method="linear").fillna(method="ffill").fillna(method="bfill").values.astype(float)
+    times_series = pd.to_numeric(df["time"], errors="coerce").interpolate(method="linear")
+    # pandas newer versions may not support fillna(method=...), use ffill/bfill directly.
+    times = times_series.ffill().bfill().values.astype(float)
     n = len(df)
 
     features_list = []
