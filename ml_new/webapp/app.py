@@ -8,7 +8,8 @@ matplotlib.use('Agg')
 
 import numpy as np
 import pandas as pd
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify
+from werkzeug.utils import secure_filename
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import matplotlib.pyplot as plt
 import joblib
@@ -21,6 +22,8 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 MODELS_DIR = ROOT_DIR / "models"
 WEBAPP_DIR = Path(__file__).resolve().parent
 TEST_DATA_DIR = WEBAPP_DIR / "test_data"
+UPLOAD_DIR = WEBAPP_DIR / "uploads"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 WINDOW_SIZE = 60
 STRIDE = 30
@@ -172,6 +175,20 @@ def normalize_columns(df: pd.DataFrame):
     elif "time" not in df.columns:
         df["time"] = np.arange(len(df))
 
+    # Coerce numeric columns to numeric, invalid entries become NaN
+    if hr_mapped:
+        df["heart_rate_bpm"] = pd.to_numeric(df["heart_rate_bpm"], errors="coerce")
+    if spo2_mapped:
+        df["spo2"] = pd.to_numeric(df["spo2"], errors="coerce")
+
+    # Time normalization
+    if "time" in df.columns:
+        df["time"] = pd.to_numeric(df["time"], errors="coerce")
+        if df["time"].isna().any():
+            df["time"] = df["time"].interpolate(method="linear").fillna(method="ffill").fillna(method="bfill")
+    else:
+        df["time"] = np.arange(len(df), dtype=float)
+
     # Label (optional)
     if "label" in df.columns:
         def map_label(val):
@@ -225,9 +242,11 @@ def create_windows_and_predict(df, model):
     Window the per-second data, extract features, predict.
     Returns per-second predictions and probabilities.
     """
-    hr = df["heart_rate_bpm"].values.astype(float)
-    spo2 = df["spo2"].values.astype(float) if "spo2" in df.columns else np.full(len(df), np.nan)
-    times = df["time"].values.astype(float)
+    # safe numeric conversion (bad tokens -> NaN)
+    hr = pd.to_numeric(df["heart_rate_bpm"], errors="coerce").values.astype(float)
+    spo2 = (pd.to_numeric(df["spo2"], errors="coerce").values.astype(float)
+            if "spo2" in df.columns else np.full(len(df), np.nan))
+    times = pd.to_numeric(df["time"], errors="coerce").interpolate(method="linear").fillna(method="ffill").fillna(method="bfill").values.astype(float)
     n = len(df)
 
     features_list = []
@@ -434,6 +453,14 @@ def analyze():
     else:
         df_sec = df.copy()
 
+    # Reject fully invalid signal data after coercion
+    if df_sec["heart_rate_bpm"].isna().all():
+        flash("No valid numeric heart rate values found after cleaning. Please check your CSV format.")
+        return redirect(url_for("index"))
+    if has_spo2 and df_sec["spo2"].isna().all():
+        flash("No valid numeric SpO2 values found after cleaning. Please check your CSV format.")
+        return redirect(url_for("index"))
+
     # Load model and predict
     model = get_model()
     y_pred, y_proba = create_windows_and_predict(df_sec, model)
@@ -504,6 +531,38 @@ def analyze():
         has_spo2=has_spo2,
     )
 
+@app.route('/upload', methods=['POST'])
+def upload_csv():
+    # 1) Multipart/form-data upload field (standard browser/form method)
+    if 'file' in request.files:
+        uploaded_file = request.files['file']
+        if uploaded_file.filename == '':
+            return jsonify({'error': 'filename missing'}), 400
+        safe_name = secure_filename(uploaded_file.filename)
+        if not safe_name.lower().endswith('.csv'):
+            safe_name += '.csv'
+        target_path = UPLOAD_DIR / safe_name
+        uploaded_file.save(target_path)
+        return jsonify({'status': 'ok', 'path': str(target_path)}), 200
+
+    # 2) Raw body upload (ESP32 may send text/csv or octet-stream)
+    content_type = (request.content_type or '').lower()
+    raw = request.get_data() or b''
+    if raw:
+        if 'text/csv' in content_type or 'application/csv' in content_type or 'application/octet-stream' in content_type:
+            filename = request.args.get('filename', None) or request.args.get('name', None)
+            if not filename:
+                from datetime import datetime
+                filename = f"uploaded_{datetime.utcnow():%Y%m%d_%H%M%S_%f}.csv"
+            safe_name = secure_filename(filename)
+            if not safe_name.lower().endswith('.csv'):
+                safe_name += '.csv'
+            target_path = UPLOAD_DIR / safe_name
+            with open(target_path, 'wb') as f:
+                f.write(raw)
+            return jsonify({'status': 'ok', 'path': str(target_path)}), 200
+
+    return jsonify({'error': 'No CSV data received or unsupported content type'}), 400
 
 if __name__ == "__main__":
     app.run(debug=True)
