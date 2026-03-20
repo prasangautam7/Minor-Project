@@ -450,29 +450,19 @@ def analyze():
             flash("Selected file not found in database.")
             return redirect(url_for("index"))
 
-        path = entry.get("path")
-        if path and Path(path).exists():
-            try:
-                df = pd.read_csv(path)
-            except Exception:
-                flash("Could not read the selected file from disk. Possibly missing/corrupted.")
-                return redirect(url_for("index"))
-        else:
-            # fallback: download from cloudinary URL
-            url = entry.get("url")
-            if not url:
-                flash("No valid source found for selected file.")
-                return redirect(url_for("index"))
-            try:
-                import requests
-                r = requests.get(url)
-                r.raise_for_status()
-                path = UPLOAD_DIR / secure_filename(selected_file)
-                path.write_bytes(r.content)
-                df = pd.read_csv(path)
-            except Exception:
-                flash("Could not download/parse the selected file from cloud storage.")
-                return redirect(url_for("index"))
+        url = entry.get("url")
+        if not url:
+            flash("No valid URL found for selected file entry.")
+            return redirect(url_for("index"))
+
+        try:
+            import requests
+            r = requests.get(url)
+            r.raise_for_status()
+            df = pd.read_csv(io.StringIO(r.text))
+        except Exception:
+            flash("Could not download/parse the selected file from cloud storage URL.")
+            return redirect(url_for("index"))
     else:
         flash("Please upload a file or select a stored file.")
         return redirect(url_for("index"))

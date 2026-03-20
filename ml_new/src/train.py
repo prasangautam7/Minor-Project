@@ -1,6 +1,5 @@
 """
-Train Random Forest, XGBoost, and SVM models for sleep apnea detection.
-Patient-level train/val/test split to prevent data leakage.
+Train Random Forest
 """
 import os
 import sys
@@ -17,8 +16,6 @@ from sklearn.metrics import (
     roc_auc_score, average_precision_score, classification_report,
     confusion_matrix
 )
-from xgboost import XGBClassifier
-
 from utils import PATIENT_IDS, MODEL_DIR, OUTPUT_DIR
 from preprocess import preprocess_all_patients
 from windowing import create_all_windows
@@ -114,52 +111,7 @@ def train_random_forest(X_train, y_train, X_val, y_val):
     return best_model
 
 
-def train_xgboost(X_train, y_train, X_val, y_val):
-    print("\n" + "="*60)
-    print("Training XGBoost...")
-    print("="*60)
 
-    pos_count = np.sum(y_train == 1)
-    neg_count = np.sum(y_train == 0)
-    scale_pos = neg_count / max(pos_count, 1)
-
-    param_grid = {
-        "n_estimators": [200, 300],
-        "max_depth": [5, 8, 12],
-        "learning_rate": [0.05, 0.1],
-        "scale_pos_weight": [scale_pos],
-    }
-    xgb = XGBClassifier(random_state=42, n_jobs=-1, eval_metric="logloss")
-    grid = GridSearchCV(xgb, param_grid, cv=3, scoring="f1", n_jobs=-1, verbose=1)
-    grid.fit(X_train, y_train)
-
-    best_model = grid.best_estimator_
-    print(f"Best params: {grid.best_params_}")
-    evaluate_model(best_model, X_val, y_val, "Validation (XGBoost)")
-    return best_model
-
-
-def train_svm(X_train, y_train, X_val, y_val, scaler):
-    print("\n" + "="*60)
-    print("Training SVM...")
-    print("="*60)
-
-    X_train_s = scaler.transform(X_train)
-    X_val_s = scaler.transform(X_val)
-
-    param_grid = {
-        "C": [0.1, 1, 10],
-        "gamma": ["scale", "auto"],
-        "class_weight": ["balanced"],
-    }
-    svm = SVC(kernel="rbf", probability=True, random_state=42)
-    grid = GridSearchCV(svm, param_grid, cv=3, scoring="f1", n_jobs=-1, verbose=1)
-    grid.fit(X_train_s, y_train)
-
-    best_model = grid.best_estimator_
-    print(f"Best params: {grid.best_params_}")
-    evaluate_model(best_model, X_val_s, y_val, "Validation (SVM)")
-    return best_model
 
 
 def main():
@@ -207,10 +159,6 @@ def main():
     print("\nStep 5: Training models...")
     rf_model = train_random_forest(split["X_train"], split["y_train"],
                                    split["X_val"], split["y_val"])
-    xgb_model = train_xgboost(split["X_train"], split["y_train"],
-                              split["X_val"], split["y_val"])
-    svm_model = train_svm(split["X_train"], split["y_train"],
-                          split["X_val"], split["y_val"], scaler)
 
     # Step 6: Evaluate on test set
     print("\n" + "#"*60)
@@ -222,17 +170,10 @@ def main():
     results["Random Forest"] = evaluate_model(
         rf_model, split["X_test"], split["y_test"], "Test (Random Forest)")
 
-    results["XGBoost"] = evaluate_model(
-        xgb_model, split["X_test"], split["y_test"], "Test (XGBoost)")
 
     X_test_s = scaler.transform(split["X_test"])
-    results["SVM"] = evaluate_model(
-        svm_model, X_test_s, split["y_test"], "Test (SVM)")
-
     # Save models
     joblib.dump(rf_model, MODEL_DIR / "random_forest.joblib")
-    joblib.dump(xgb_model, MODEL_DIR / "xgboost.joblib")
-    joblib.dump(svm_model, MODEL_DIR / "svm.joblib")
     joblib.dump(scaler, MODEL_DIR / "scaler.joblib")
     print(f"\nModels saved to {MODEL_DIR}")
 
