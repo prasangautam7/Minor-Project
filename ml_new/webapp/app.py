@@ -1,6 +1,7 @@
 import io
 import os
 import base64
+from datetime import datetime
 from pathlib import Path
 
 import matplotlib
@@ -423,17 +424,57 @@ def download_sample():
     return send_from_directory(TEST_DATA_DIR, "sample_patient_35.csv", as_attachment=True)
 
 
+@app.route("/files", methods=["GET"])
+def files():
+    rows = collection.find({}, {"_id": 0, "filename": 1}).sort("uploaded_at", -1)
+    file_list = [r["filename"] for r in rows]
+    return jsonify({"files": file_list})
+
+
 @app.route("/analyze", methods=["POST"])
 def analyze():
     file = request.files.get("data_file")
-    if not file or file.filename == "":
-        flash("Please upload a CSV file.")
-        return redirect(url_for("index"))
+    selected_file = request.form.get("selected_file", "").strip()
+    df = None
 
-    try:
-        df = pd.read_csv(file)
-    except Exception:
-        flash("Could not read the CSV file. Please check the format.")
+    if file and file.filename:
+        try:
+            df = pd.read_csv(file)
+        except Exception:
+            flash("Could not read the uploaded CSV file. Please check the format.")
+            return redirect(url_for("index"))
+
+    elif selected_file:
+        entry = collection.find_one({"filename": selected_file})
+        if not entry:
+            flash("Selected file not found in database.")
+            return redirect(url_for("index"))
+
+        path = entry.get("path")
+        if path and Path(path).exists():
+            try:
+                df = pd.read_csv(path)
+            except Exception:
+                flash("Could not read the selected file from disk. Possibly missing/corrupted.")
+                return redirect(url_for("index"))
+        else:
+            # fallback: download from cloudinary URL
+            url = entry.get("url")
+            if not url:
+                flash("No valid source found for selected file.")
+                return redirect(url_for("index"))
+            try:
+                import requests
+                r = requests.get(url)
+                r.raise_for_status()
+                path = UPLOAD_DIR / secure_filename(selected_file)
+                path.write_bytes(r.content)
+                df = pd.read_csv(path)
+            except Exception:
+                flash("Could not download/parse the selected file from cloud storage.")
+                return redirect(url_for("index"))
+    else:
+        flash("Please upload a file or select a stored file.")
         return redirect(url_for("index"))
 
     df, hr_ok, has_spo2, resolution = normalize_columns(df)
@@ -533,6 +574,20 @@ def analyze():
         has_spo2=has_spo2,
     )
 
+import cloudinary
+from cloudinary import uploader
+from pymongo import MongoClient
+
+client = MongoClient("mongodb+srv://prasan:prasan123@cluster0.iecuydb.mongodb.net/?appName=Cluster0")
+db = client["Minor_Project"]
+collection = db["files"]
+
+cloudinary.config(
+    cloud_name="dfdkmr4wu",
+    api_key="927846171834547",
+    api_secret="fpHRe4SGWIhl-ncpZxnFP4qaJEI"
+)
+
 @app.route('/upload', methods=['POST'])
 def upload_csv():
     # 1) Multipart/form-data upload field (standard browser/form method)
@@ -545,7 +600,21 @@ def upload_csv():
             safe_name += '.csv'
         target_path = UPLOAD_DIR / safe_name
         uploaded_file.save(target_path)
-        return jsonify({'status': 'ok', 'path': str(target_path)}), 200
+        result = uploader.upload(
+            str(target_path),
+            resource_type="raw",
+            public_id=uploaded_file.filename,
+            overwrite=True
+        )
+
+        file_url = result.get('secure_url')
+        collection.insert_one({
+            "filename": uploaded_file.filename,
+            "url": file_url,
+            "path": str(target_path),
+            "uploaded_at": datetime.utcnow()
+        })
+        return jsonify({'status': 'ok', 'path': str(target_path), 'file_url': file_url}), 200
 
     # 2) Raw body upload (ESP32 may send text/csv or octet-stream)
     content_type = (request.content_type or '').lower()
@@ -554,7 +623,6 @@ def upload_csv():
         if 'text/csv' in content_type or 'application/csv' in content_type or 'application/octet-stream' in content_type:
             filename = request.args.get('filename', None) or request.args.get('name', None)
             if not filename:
-                from datetime import datetime
                 filename = f"uploaded_{datetime.utcnow():%Y%m%d_%H%M%S_%f}.csv"
             safe_name = secure_filename(filename)
             if not safe_name.lower().endswith('.csv'):

@@ -51,11 +51,17 @@
               </div>
               <h3>Upload Your Data</h3>
               <p>Drag & drop your CSV file or click to browse</p>
-              <input type="file" name="data_file" id="fileInput" accept=".csv" required hidden />
+              <input type="file" name="data_file" id="fileInput" accept=".csv" hidden />
               <button type="button" class="btn btn-outline" onclick="document.getElementById('fileInput').click()">
-                <i class="fas fa-folder-open"></i> Choose File
+                <i class="fas fa-folder-open"></i> Choose Local File
               </button>
               <div class="file-info" id="fileInfo"></div>
+              <div style="margin-top: 0.75rem; width:100%;">
+                <label for="fileSelect" style="display:block; margin-bottom:0.35rem; color:#94a3b8;">Or choose uploaded file from database</label>
+                <select name="selected_file" id="fileSelect" style="width:100%; padding:0.7rem; border-radius:0.5rem; border:1px solid #cbd5e1; background:#fff; color:#0f172a;">
+                  <option value="">-- select stored file --</option>
+                </select>
+              </div>
             </div>
             <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn" disabled>
               <i class="fas fa-microscope"></i> Analyze Data
@@ -87,20 +93,6 @@
                 </linearGradient>
               </defs>
             </svg>
-          </div>
-          <div class="stats-preview">
-            <div class="stat-item">
-              <span class="stat-value">83%</span>
-              <span class="stat-label">Accuracy</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">0.89</span>
-              <span class="stat-label">AUC-ROC</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">50</span>
-              <span class="stat-label">Patients</span>
-            </div>
           </div>
         </div>
       </div>
@@ -222,7 +214,7 @@
           <i class="fas fa-lungs"></i>
           <span>SleepApnea<strong>AI</strong></span>
         </div>
-        <p>Final Year Project | Machine Learning for Healthcare</p>
+        <p>Minor Project | Machine Learning for Healthcare</p>
         <p class="footer-tech">
           <span><i class="fab fa-python"></i> Python</span>
           <span><i class="fas fa-flask"></i> Flask</span>
@@ -237,8 +229,31 @@
     const fileInput = document.getElementById('fileInput');
     const fileInfo = document.getElementById('fileInfo');
     const analyzeBtn = document.getElementById('analyzeBtn');
+    const fileSelect = document.getElementById('fileSelect');
 
-    // Drag and drop
+    const setAnalyzeButton = () => {
+      const hasLocalFile = fileInput.files && fileInput.files.length > 0;
+      const selectedFile = fileSelect.value;
+      analyzeBtn.disabled = !(hasLocalFile || selectedFile);
+    };
+
+    const fetchFileList = async () => {
+      try {
+        const resp = await fetch('/files');
+        const data = await resp.json();
+        fileSelect.innerHTML = '<option value="">-- select stored file --</option>';
+        data.files.forEach(name => {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          fileSelect.appendChild(opt);
+        });
+      } catch (err) {
+        console.warn('Could not fetch stored file list', err);
+      }
+    };
+
+    // drag-and-drop
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
       dropZone.addEventListener(eventName, preventDefaults, false);
     });
@@ -260,27 +275,43 @@
       const files = e.dataTransfer.files;
       if (files.length) {
         fileInput.files = files;
+        fileSelect.value = '';
         handleFile(files[0]);
       }
     });
 
     fileInput.addEventListener('change', (e) => {
       if (e.target.files.length) {
+        fileSelect.value = '';
         handleFile(e.target.files[0]);
       }
+      setAnalyzeButton();
+    });
+
+    fileSelect.addEventListener('change', (e) => {
+      if (e.target.value) {
+        fileInfo.innerHTML = `<i class="fas fa-database"></i> Selected stored file: ${e.target.value}`;
+        fileInfo.classList.add('success');
+        fileInput.value = null;
+      } else {
+        fileInfo.innerHTML = '';
+      }
+      setAnalyzeButton();
     });
 
     function handleFile(file) {
       if (file.name.endsWith('.csv')) {
         fileInfo.innerHTML = `<i class="fas fa-check-circle"></i> ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
         fileInfo.classList.add('success');
-        analyzeBtn.disabled = false;
+        setAnalyzeButton();
       } else {
         fileInfo.innerHTML = `<i class="fas fa-times-circle"></i> Please select a CSV file`;
         fileInfo.classList.remove('success');
         analyzeBtn.disabled = true;
       }
     }
+
+    fetchFileList();
   </script>
 </body>
 </html>
