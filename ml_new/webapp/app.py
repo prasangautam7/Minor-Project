@@ -456,10 +456,17 @@ def analyze():
             return redirect(url_for("index"))
 
         try:
-            import requests
-            r = requests.get(url)
-            r.raise_for_status()
-            df = pd.read_csv(io.StringIO(r.text))
+            try:
+                import requests
+                r = requests.get(url, timeout=15)
+                r.raise_for_status()
+                data_bytes = r.content
+            except ModuleNotFoundError:
+                import urllib.request
+                with urllib.request.urlopen(url, timeout=15) as res:
+                    data_bytes = res.read()
+
+            df = pd.read_csv(io.BytesIO(data_bytes))
         except Exception:
             flash("Could not download/parse the selected file from cloud storage URL.")
             return redirect(url_for("index"))
@@ -567,15 +574,16 @@ def analyze():
 import cloudinary
 from cloudinary import uploader
 from pymongo import MongoClient
-
-client = MongoClient("mongodb+srv://prasan:prasan123@cluster0.iecuydb.mongodb.net/?appName=Cluster0")
-db = client["Minor_Project"]
-collection = db["files"]
+from dotenv import load_dotenv
+load_dotenv()
+client = MongoClient(os.getenv("MONGODB_URI"))
+db = client[os.getenv("MONGODB_DB", "Minor_Project")]
+collection = db[os.getenv("MONGODB_COLLECTION", "files")]
 
 cloudinary.config(
-    cloud_name="dfdkmr4wu",
-    api_key="927846171834547",
-    api_secret="fpHRe4SGWIhl-ncpZxnFP4qaJEI"
+    cloud_name=os.getenv("CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
 )
 
 @app.route('/upload', methods=['POST'])
@@ -588,12 +596,12 @@ def upload_csv():
         safe_name = secure_filename(uploaded_file.filename)
         if not safe_name.lower().endswith('.csv'):
             safe_name += '.csv'
-        target_path = UPLOAD_DIR / safe_name
-        uploaded_file.save(target_path)
+
+        # Upload directly to Cloudinary raw storage; avoid saving in local UPLOAD_DIR
         result = uploader.upload(
-            str(target_path),
+            uploaded_file,
             resource_type="raw",
-            public_id=uploaded_file.filename,
+            public_id=safe_name,
             overwrite=True
         )
 
@@ -601,10 +609,9 @@ def upload_csv():
         collection.insert_one({
             "filename": uploaded_file.filename,
             "url": file_url,
-            "path": str(target_path),
             "uploaded_at": datetime.utcnow()
         })
-        return jsonify({'status': 'ok', 'path': str(target_path), 'file_url': file_url}), 200
+        return jsonify({'status': 'ok', 'file_url': file_url}), 200
 
     # 2) Raw body upload (ESP32 may send text/csv or octet-stream)
     content_type = (request.content_type or '').lower()
@@ -617,10 +624,21 @@ def upload_csv():
             safe_name = secure_filename(filename)
             if not safe_name.lower().endswith('.csv'):
                 safe_name += '.csv'
-            target_path = UPLOAD_DIR / safe_name
-            with open(target_path, 'wb') as f:
-                f.write(raw)
-            return jsonify({'status': 'ok', 'path': str(target_path)}), 200
+
+            # Upload raw bytes directly to Cloudinary
+            result = uploader.upload(
+                io.BytesIO(raw),
+                resource_type='raw',
+                public_id=safe_name,
+                overwrite=True
+            )
+            file_url = result.get('secure_url')
+            collection.insert_one({
+                'filename': safe_name,
+                'url': file_url,
+                'uploaded_at': datetime.utcnow()
+            })
+            return jsonify({'status': 'ok', 'file_url': file_url}), 200
 
     return jsonify({'error': 'No CSV data received or unsupported content type'}), 400
 

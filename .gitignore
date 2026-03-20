@@ -1,0 +1,3 @@
+//add .env to gitignore
+# Ignore environment variable files
+.env
