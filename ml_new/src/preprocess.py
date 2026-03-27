@@ -17,7 +17,7 @@ def clean_signals(signals: pd.DataFrame, max_interp_gap: int = 30) -> pd.DataFra
 
     # Clip physiologically implausible values
     df.loc[df["HR"] < 30, "HR"] = np.nan
-    df.loc[df["HR"] > 200, "HR"] = np.nan
+    df.loc[df["HR"] > 140, "HR"] = np.nan
     df.loc[df["SpO2"] < 50, "SpO2"] = np.nan
 
     # Interpolate short gaps

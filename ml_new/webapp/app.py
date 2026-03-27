@@ -58,47 +58,66 @@ def _slope(x):
 
 
 def _count_hr_jumps(hr, threshold=5):
+    """
+    Count number of sudden HR changes > threshold bpm
+    in either direction (absolute change).
+    """
     valid = hr[~np.isnan(hr)]
     if len(valid) < 2:
         return 0
-    return int(np.sum(np.diff(valid) > threshold))
+    diffs = np.diff(valid)
+    return int(np.sum(np.abs(diffs) > threshold))
 
 
-def _count_desaturations(spo2, drop_threshold=3):
+def _count_desaturations(spo2, drop_threshold=4, min_absolute=94):
+    """
+    Count SpO2 drops >= drop_threshold from a dynamic running baseline.
+    """
     valid = spo2[~np.isnan(spo2)]
     if len(valid) < 5:
         return 0
-    baseline = np.nanmax(valid[:10]) if len(valid) >= 10 else np.nanmax(valid)
-    count, in_desat = 0, False
+
+    count    = 0
+    in_desat = False
+    baseline = valid[0]
+
     for v in valid:
-        if baseline - v >= drop_threshold:
+        if v > baseline:
+            baseline = v
+            in_desat = False
+        if baseline - v >= drop_threshold and v < min_absolute:
             if not in_desat:
-                count += 1
+                count   += 1
                 in_desat = True
         else:
             in_desat = False
+
     return count
 
 
 def extract_window_features(hr, spo2):
-    """Extract 19 features from a single window of HR and SpO2 arrays."""
+    """Extract 19 features from a single 60-second window."""
     hr = hr.astype(float)
     spo2 = spo2.astype(float)
+    
+    all_hr_nan = np.all(np.isnan(hr))
+    all_spo2_nan = np.all(np.isnan(spo2))
+    
     f = {}
 
-    f["hr_mean"] = np.nanmean(hr)
-    f["hr_std"] = np.nanstd(hr) if not np.all(np.isnan(hr)) else 0.0
-    f["hr_min"] = np.nanmin(hr)
-    f["hr_max"] = np.nanmax(hr)
+    f["hr_mean"] = np.nanmean(hr) if not all_hr_nan else 0.0
+    f["hr_std"] = np.nanstd(hr) if not all_hr_nan else 0.0
+    f["hr_min"] = np.nanmin(hr) if not all_hr_nan else 0.0
+    f["hr_max"] = np.nanmax(hr) if not all_hr_nan else 0.0
     f["hr_range"] = f["hr_max"] - f["hr_min"]
     f["hr_rmssd"] = _rmssd(hr)
     f["hr_jumps"] = _count_hr_jumps(hr)
     f["hr_slope"] = _slope(hr)
 
-    f["spo2_mean"] = np.nanmean(spo2)
-    f["spo2_std"] = np.nanstd(spo2) if not np.all(np.isnan(spo2)) else 0.0
-    f["spo2_min"] = np.nanmin(spo2)
-    f["spo2_max"] = np.nanmax(spo2)
+    f["spo2_mean"] = np.nanmean(spo2) if not all_spo2_nan else 0.0
+    f["spo2_std"] = np.nanstd(spo2) if not all_spo2_nan else 0.0
+    f["spo2_min"] = np.nanmin(spo2) if not all_spo2_nan else 0.0
+    f["spo2_max"] = np.nanmax(spo2) if not all_spo2_nan else 0.0
     f["spo2_desaturations"] = _count_desaturations(spo2)
     f["spo2_time_below_90"] = int(np.sum(spo2[~np.isnan(spo2)] < 90))
     f["spo2_delta"] = f["spo2_max"] - f["spo2_min"]
@@ -111,10 +130,15 @@ def extract_window_features(hr, spo2):
     else:
         f["hr_spo2_corr"] = 0.0
 
-    hr_c = hr.copy(); hr_c[np.isnan(hr_c)] = np.nanmean(hr_c)
-    spo2_c = spo2.copy(); spo2_c[np.isnan(spo2_c)] = np.nanmean(spo2_c)
-    f["time_lag_spo2_hr"] = float(np.argmax(hr_c) - np.argmin(spo2_c))
-    f["combined_desat_idx"] = f["spo2_desaturations"] * f["hr_jumps"]
+    # Time lag: check all-NaN BEFORE filling
+    if np.all(np.isnan(hr)) or np.all(np.isnan(spo2)):
+        f["time_lag_spo2_hr"] = 0.0
+    else:
+        hr_c = hr.copy(); hr_c[np.isnan(hr_c)] = np.nanmean(hr_c)
+        spo2_c = spo2.copy(); spo2_c[np.isnan(spo2_c)] = np.nanmean(spo2_c)
+        f["time_lag_spo2_hr"] = float(np.argmax(hr_c) - np.argmin(spo2_c))
+    
+    f["combined_desat_idx"] = (f["spo2_desaturations"] + f["hr_jumps"]) / 2.0
 
     return [f[name] for name in FEATURE_NAMES]
 

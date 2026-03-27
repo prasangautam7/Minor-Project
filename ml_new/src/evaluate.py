@@ -23,73 +23,67 @@ from features import extract_all_features, FEATURE_NAMES
 from train import patient_level_split, get_split_ids
 
 
-def plot_roc_curves(models_dict, X_test, y_test, save_path):
-    """Plot ROC curves for all models."""
+def plot_roc_curves(model, X_test, y_test, save_path):
+    """Plot ROC curve for Random Forest model."""
     plt.figure(figsize=(8, 6))
-    for name, (model, needs_scaling, scaler) in models_dict.items():
-        X = scaler.transform(X_test) if needs_scaling else X_test
-        if hasattr(model, "predict_proba"):
-            y_prob = model.predict_proba(X)[:, 1]
-        else:
-            y_prob = model.decision_function(X)
-        fpr, tpr, _ = roc_curve(y_test, y_prob)
-        auc_val = auc(fpr, tpr)
-        plt.plot(fpr, tpr, label=f"{name} (AUC={auc_val:.3f})", linewidth=2)
+    if hasattr(model, "predict_proba"):
+        y_prob = model.predict_proba(X_test)[:, 1]
+    else:
+        y_prob = model.decision_function(X_test)
+    fpr, tpr, _ = roc_curve(y_test, y_prob)
+    auc_val = auc(fpr, tpr)
+    plt.plot(fpr, tpr, label=f"Random Forest (AUC={auc_val:.3f})", linewidth=2)
 
     plt.plot([0, 1], [0, 1], "k--", alpha=0.3)
     plt.xlabel("False Positive Rate", fontsize=12)
     plt.ylabel("True Positive Rate", fontsize=12)
-    plt.title("ROC Curves - Sleep Apnea Detection", fontsize=14)
+    plt.title("ROC Curve - Sleep Apnea Detection", fontsize=14)
     plt.legend(fontsize=11)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
     plt.close()
-    print(f"ROC curves saved to {save_path}")
+    print(f"ROC curve saved to {save_path}")
 
 
-def plot_pr_curves(models_dict, X_test, y_test, save_path):
-    """Plot Precision-Recall curves for all models."""
+def plot_pr_curve(model, X_test, y_test, save_path):
+    """Plot Precision-Recall curve for Random Forest model."""
     plt.figure(figsize=(8, 6))
-    for name, (model, needs_scaling, scaler) in models_dict.items():
-        X = scaler.transform(X_test) if needs_scaling else X_test
-        if hasattr(model, "predict_proba"):
-            y_prob = model.predict_proba(X)[:, 1]
-        else:
-            y_prob = model.decision_function(X)
-        prec, rec, _ = precision_recall_curve(y_test, y_prob)
-        auc_val = auc(rec, prec)
-        plt.plot(rec, prec, label=f"{name} (AUC={auc_val:.3f})", linewidth=2)
+    if hasattr(model, "predict_proba"):
+        y_prob = model.predict_proba(X_test)[:, 1]
+    else:
+        y_prob = model.decision_function(X_test)
+    prec, rec, _ = precision_recall_curve(y_test, y_prob)
+    auc_val = auc(rec, prec)
+    plt.plot(rec, prec, label=f"Random Forest (AUC={auc_val:.3f})", linewidth=2)
 
     baseline = y_test.sum() / len(y_test)
     plt.axhline(y=baseline, color="k", linestyle="--", alpha=0.3, label=f"Baseline ({baseline:.2f})")
     plt.xlabel("Recall", fontsize=12)
     plt.ylabel("Precision", fontsize=12)
-    plt.title("Precision-Recall Curves - Sleep Apnea Detection", fontsize=14)
+    plt.title("Precision-Recall Curve - Sleep Apnea Detection", fontsize=14)
     plt.legend(fontsize=11)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
     plt.close()
-    print(f"PR curves saved to {save_path}")
+    print(f"PR curve saved to {save_path}")
 
 
-def plot_confusion_matrices(models_dict, X_test, y_test, save_path):
-    """Plot confusion matrices for all models side by side."""
-    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-    for idx, (name, (model, needs_scaling, scaler)) in enumerate(models_dict.items()):
-        X = scaler.transform(X_test) if needs_scaling else X_test
-        y_pred = model.predict(X)
-        cm = confusion_matrix(y_test, y_pred)
-        disp = ConfusionMatrixDisplay(cm, display_labels=["Normal", "Apnea"])
-        disp.plot(ax=axes[idx], cmap="Blues", colorbar=False)
-        axes[idx].set_title(f"{name}", fontsize=13)
+def plot_confusion_matrix(model, X_test, y_test, save_path):
+    """Plot confusion matrix for Random Forest model."""
+    fig, ax = plt.subplots(figsize=(6, 5))
+    y_pred = model.predict(X_test)
+    cm = confusion_matrix(y_test, y_pred)
+    disp = ConfusionMatrixDisplay(cm, display_labels=["Normal", "Apnea"])
+    disp.plot(ax=ax, cmap="Blues", colorbar=False)
+    ax.set_title("Random Forest", fontsize=13)
 
-    plt.suptitle("Confusion Matrices - Test Set", fontsize=15)
+    plt.suptitle("Confusion Matrix - Test Set", fontsize=15)
     plt.tight_layout()
     plt.savefig(save_path, dpi=150)
     plt.close()
-    print(f"Confusion matrices saved to {save_path}")
+    print(f"Confusion matrix saved to {save_path}")
 
 
 def plot_feature_importance(model, save_path):
@@ -145,9 +139,6 @@ def main():
 
     # Load models
     rf_model = joblib.load(MODEL_DIR / "random_forest.joblib")
-    xgb_model = joblib.load(MODEL_DIR / "xgboost.joblib")
-    svm_model = joblib.load(MODEL_DIR / "svm.joblib")
-    scaler = joblib.load(MODEL_DIR / "scaler.joblib")
 
     # Rebuild test data
     print("Loading data for evaluation...")
@@ -159,23 +150,14 @@ def main():
     train_ids, val_ids, test_ids = get_split_ids()
     split = patient_level_split(X, y, pids, train_ids, val_ids, test_ids)
 
-    models_dict = {
-        "Random Forest": (rf_model, False, None),
-        "XGBoost": (xgb_model, False, None),
-        "SVM": (svm_model, True, scaler),
-    }
-
     # Load results
     with open(OUTPUT_DIR / "results.json") as f:
         results = json.load(f)
 
-    # Generate plots
-    plot_roc_curves(models_dict, split["X_test"], split["y_test"],
-                    OUTPUT_DIR / "roc_curves.png")
-    plot_pr_curves(models_dict, split["X_test"], split["y_test"],
-                   OUTPUT_DIR / "pr_curves.png")
-    plot_confusion_matrices(models_dict, split["X_test"], split["y_test"],
-                            OUTPUT_DIR / "confusion_matrices.png")
+    # Generate plots for Random Forest only
+    plot_roc_curves(rf_model, split["X_test"], split["y_test"], OUTPUT_DIR / "roc_curves.png")
+    plot_pr_curve(rf_model, split["X_test"], split["y_test"], OUTPUT_DIR / "pr_curves.png")
+    plot_confusion_matrix(rf_model, split["X_test"], split["y_test"], OUTPUT_DIR / "confusion_matrices.png")
     plot_feature_importance(rf_model, OUTPUT_DIR / "feature_importance.png")
     plot_model_comparison(results, OUTPUT_DIR / "model_comparison.png")
 

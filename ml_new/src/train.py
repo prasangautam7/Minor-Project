@@ -2,14 +2,10 @@
 Train Random Forest
 """
 import os
-import sys
 import json
 import numpy as np
-import pandas as pd
 import joblib
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score,
@@ -30,11 +26,11 @@ def patient_level_split(X, y, patient_ids, train_pids, val_pids, test_pids):
 
     return {
         "X_train": X[train_mask], "y_train": y[train_mask],
-        "X_val": X[val_mask], "y_val": y[val_mask],
+        "X_val": X[val_mask],   "y_val": y[val_mask],
         "X_test": X[test_mask], "y_test": y[test_mask],
         "pids_train": patient_ids[train_mask],
-        "pids_val": patient_ids[val_mask],
-        "pids_test": patient_ids[test_mask],
+        "pids_val":   patient_ids[val_mask],
+        "pids_test":  patient_ids[test_mask],
     }
 
 
@@ -47,31 +43,25 @@ def get_split_ids():
     ids = np.array(PATIENT_IDS)
     np.random.shuffle(ids)
     train_ids = list(ids[:35])
-    val_ids = list(ids[35:40])
-    test_ids = list(ids[40:])
+    val_ids   = list(ids[35:40])
+    test_ids  = list(ids[40:])
     return train_ids, val_ids, test_ids
 
 
 def evaluate_model(model, X, y, dataset_name=""):
-    """Compute all metrics for a model on given data."""
+    """Compute all metrics for the model on given data."""
     y_pred = model.predict(X)
-    y_prob = None
-    if hasattr(model, "predict_proba"):
-        y_prob = model.predict_proba(X)[:, 1]
-    elif hasattr(model, "decision_function"):
-        y_prob = model.decision_function(X)
+    y_prob = model.predict_proba(X)[:, 1]
 
     metrics = {
-        "accuracy": accuracy_score(y, y_pred),
+        "accuracy":  accuracy_score(y, y_pred),
         "precision": precision_score(y, y_pred, zero_division=0),
-        "recall": recall_score(y, y_pred, zero_division=0),
-        "f1": f1_score(y, y_pred, zero_division=0),
+        "recall":    recall_score(y, y_pred, zero_division=0),
+        "f1":        f1_score(y, y_pred, zero_division=0),
+        "auc_roc":   roc_auc_score(y, y_prob),
+        "auc_pr":    average_precision_score(y, y_prob),
+        "confusion_matrix": confusion_matrix(y, y_pred).tolist(),
     }
-    if y_prob is not None:
-        metrics["auc_roc"] = roc_auc_score(y, y_prob)
-        metrics["auc_pr"] = average_precision_score(y, y_prob)
-
-    metrics["confusion_matrix"] = confusion_matrix(y, y_pred).tolist()
 
     if dataset_name:
         print(f"\n{'='*50}")
@@ -81,9 +71,8 @@ def evaluate_model(model, X, y, dataset_name=""):
         print(f"  Precision: {metrics['precision']:.4f}")
         print(f"  Recall:    {metrics['recall']:.4f}")
         print(f"  F1 Score:  {metrics['f1']:.4f}")
-        if "auc_roc" in metrics:
-            print(f"  AUC-ROC:   {metrics['auc_roc']:.4f}")
-            print(f"  AUC-PR:    {metrics['auc_pr']:.4f}")
+        print(f"  AUC-ROC:   {metrics['auc_roc']:.4f}")
+        print(f"  AUC-PR:    {metrics['auc_pr']:.4f}")
         print(f"  Confusion Matrix:\n  {metrics['confusion_matrix']}")
         print(classification_report(y, y_pred, target_names=["Normal", "Apnea"]))
 
@@ -95,24 +84,42 @@ def train_random_forest(X_train, y_train, X_val, y_val):
     print("Training Random Forest...")
     print("="*60)
 
+    # class_weight set directly — always balanced for apnea detection
+    rf = RandomForestClassifier(
+        random_state=42,
+        n_jobs=-1,
+        class_weight="balanced"
+    )
+
     param_grid = {
-        "n_estimators": [200, 300],
-        "max_depth": [15, 25, None],
-        "min_samples_split": [2, 5],
-        "class_weight": ["balanced"],
+        "n_estimators":      [200, 300, 500],
+        "max_depth":         [10, 15, 25, None],
+        "min_samples_split": [2, 5, 10],
+        "max_features":      ["sqrt", "log2"],   # added
+        "min_samples_leaf":  [1, 2],             # added
     }
-    rf = RandomForestClassifier(random_state=42, n_jobs=-1)
-    grid = GridSearchCV(rf, param_grid, cv=3, scoring="f1", n_jobs=-1, verbose=1)
+
+    grid = GridSearchCV(
+        estimator  = rf,
+        param_grid = param_grid,
+        cv         = 5,           # increased from 3 to 5
+        scoring    = "f1",        # f1 balances precision and recall
+        n_jobs     = -1,
+        verbose    = 1,
+        refit      = True         # refit best model on full training set
+    )
+
     grid.fit(X_train, y_train)
 
     best_model = grid.best_estimator_
-    print(f"Best params: {grid.best_params_}")
+
+    print(f"\nBest params : {grid.best_params_}")
+    print(f"Best CV F1  : {grid.best_score_:.4f}")
+
+    # Evaluate on validation set
     evaluate_model(best_model, X_val, y_val, "Validation (RF)")
+
     return best_model
-
-
-
-
 
 def main():
     os.makedirs(MODEL_DIR, exist_ok=True)
@@ -126,8 +133,8 @@ def main():
     print("\nStep 2: Creating windows...")
     windows = create_all_windows(patients)
     print(f"\nTotal windows: {len(windows)}")
-    print(f"Apnea windows: {sum(1 for w in windows if w['label']==1)}")
-    print(f"Normal windows: {sum(1 for w in windows if w['label']==0)}")
+    print(f"Apnea windows:  {sum(1 for w in windows if w['label'] == 1)}")
+    print(f"Normal windows: {sum(1 for w in windows if w['label'] == 0)}")
 
     # Step 3: Extract features
     print("\nStep 3: Extracting features...")
@@ -139,8 +146,8 @@ def main():
     print("\nStep 4: Splitting data (patient-level)...")
     train_ids, val_ids, test_ids = get_split_ids()
     print(f"Train patients ({len(train_ids)}): {train_ids}")
-    print(f"Val patients ({len(val_ids)}):   {val_ids}")
-    print(f"Test patients ({len(test_ids)}):  {test_ids}")
+    print(f"Val patients   ({len(val_ids)}):   {val_ids}")
+    print(f"Test patients  ({len(test_ids)}):  {test_ids}")
 
     split = patient_level_split(X, y, pids, train_ids, val_ids, test_ids)
 
@@ -151,54 +158,48 @@ def main():
     print(f"Test:  {len(split['y_test'])} samples "
           f"({split['y_test'].sum()} apnea, {(split['y_test']==0).sum()} normal)")
 
-    # Scaler for SVM
-    scaler = StandardScaler()
-    scaler.fit(split["X_train"])
-
-    # Step 5: Train models
-    print("\nStep 5: Training models...")
-    rf_model = train_random_forest(split["X_train"], split["y_train"],
-                                   split["X_val"], split["y_val"])
+    # Step 5: Train
+    print("\nStep 5: Training Random Forest...")
+    rf_model = train_random_forest(
+        split["X_train"], split["y_train"],
+        split["X_val"],   split["y_val"]
+    )
 
     # Step 6: Evaluate on test set
     print("\n" + "#"*60)
     print("FINAL TEST SET EVALUATION")
     print("#"*60)
 
-    results = {}
+    results = {
+        "Random Forest": evaluate_model(
+            rf_model, split["X_test"], split["y_test"], "Test (Random Forest)"
+        )
+    }
 
-    results["Random Forest"] = evaluate_model(
-        rf_model, split["X_test"], split["y_test"], "Test (Random Forest)")
-
-
-    X_test_s = scaler.transform(split["X_test"])
-    # Save models
+    # Save model
     joblib.dump(rf_model, MODEL_DIR / "random_forest.joblib")
-    joblib.dump(scaler, MODEL_DIR / "scaler.joblib")
-    print(f"\nModels saved to {MODEL_DIR}")
+    print(f"\nModel saved to {MODEL_DIR}")
 
     # Save results
-    serializable = {}
-    for name, metrics in results.items():
-        serializable[name] = {k: v for k, v in metrics.items()}
-
     with open(OUTPUT_DIR / "results.json", "w") as f:
-        json.dump(serializable, f, indent=2)
+        json.dump(results, f, indent=2)
     print(f"Results saved to {OUTPUT_DIR / 'results.json'}")
 
     # Save split info
     split_info = {
         "train_patients": train_ids,
-        "val_patients": val_ids,
-        "test_patients": test_ids,
-        "feature_names": FEATURE_NAMES,
+        "val_patients":   val_ids,
+        "test_patients":  test_ids,
+        "feature_names":  FEATURE_NAMES,
     }
     with open(OUTPUT_DIR / "split_info.json", "w") as f:
         json.dump(split_info, f, indent=2)
 
-    # Feature importance (RF)
-    importances = rf_model.feature_importances_
-    feat_imp = sorted(zip(FEATURE_NAMES, importances), key=lambda x: -x[1])
+    # Feature importance
+    feat_imp = sorted(
+        zip(FEATURE_NAMES, rf_model.feature_importances_),
+        key=lambda x: -x[1]
+    )
     print("\nRandom Forest Feature Importance (Top 10):")
     for name, imp in feat_imp[:10]:
         print(f"  {name:25s} {imp:.4f}")
