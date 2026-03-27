@@ -23,8 +23,11 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 MODELS_DIR = ROOT_DIR / "models"
 WEBAPP_DIR = Path(__file__).resolve().parent
 TEST_DATA_DIR = WEBAPP_DIR / "test_data"
-UPLOAD_DIR = WEBAPP_DIR / "uploads"
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", WEBAPP_DIR / "uploads"))
+try:
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+except Exception as e:
+    raise RuntimeError(f"Unable to create upload directory {UPLOAD_DIR}: {e}")
 
 WINDOW_SIZE = 60
 STRIDE = 30
@@ -666,57 +669,69 @@ def upload_csv():
 
     return jsonify({'error': 'No CSV data received or unsupported content type'}), 400
 
-from flask import request, jsonify
-from werkzeug.utils import secure_filename
-from pathlib import Path
-from datetime import datetime
-
-UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
 
 @app.route('/upload_chunk', methods=['POST'])
 def upload_chunk():
     filename = request.form.get('filename')
-    # Convert to int, defaulting to -1 if missing
     try:
         chunk_index = int(request.form.get('chunk_index', -1))
         total_chunks = int(request.form.get('total_chunks', -1))
-    except ValueError:
+    except (ValueError, TypeError):
         return jsonify({'error': 'Invalid index or total count'}), 400
-        
-    chunk_data = request.files.get('chunk')
 
-    if not filename or chunk_index < 1 or total_chunks <= 0 or not chunk_data:
-        return jsonify({'error': 'Missing required parameters or invalid indices'}), 400
+    chunk_data = request.files.get('chunk') or request.files.get('file')
+    app.logger.debug('upload_chunk: filename=%s chunk_index=%s total_chunks=%s files=%s',
+                     filename, chunk_index, total_chunks, list(request.files.keys()))
+
+    if not filename or total_chunks <= 0 or chunk_data is None:
+        return jsonify({'error': 'Missing required parameters'}), 400
+
+    # Accept either 0-based or 1-based indexing (client-dependent)
+    if 0 <= chunk_index < total_chunks:
+        indexes = range(0, total_chunks)
+    elif 1 <= chunk_index <= total_chunks:
+        indexes = range(1, total_chunks + 1)
+    else:
+        return jsonify({'error': 'chunk_index out of range'}), 400
 
     safe_name = secure_filename(filename)
-    UPLOAD_DIR.mkdir(exist_ok=True)
 
-    # Save chunk (ESP32 sends index 1 to total_chunks)
     temp_path = UPLOAD_DIR / f"{safe_name}.part{chunk_index}"
     chunk_data.save(temp_path)
 
-    # Check if all chunks (from 1 to total_chunks) exist
-    all_parts_exist = all(
-        (UPLOAD_DIR / f"{safe_name}.part{i}").exists()
-        for i in range(1, total_chunks + 1)
-    )
+    all_parts_exist = all((UPLOAD_DIR / f"{safe_name}.part{i}").exists() for i in indexes)
 
     if all_parts_exist:
         combined_path = UPLOAD_DIR / safe_name
 
-        with open(combined_path, 'wb') as combined_file:
-            for i in range(1, total_chunks + 1):
-                part_path = UPLOAD_DIR / f"{safe_name}.part{i}"
-                
-                with open(part_path, 'rb') as part_file:
-                    # Write the raw bytes directly to maintain CSV structure
-                    combined_file.write(part_file.read())
-                
-                # Clean up the part file immediately after writing
-                part_path.unlink()
+        combined_lines = []
+        previous_tail = None
 
-        # Upload to Cloudinary
+        for i in indexes:
+            part_path = UPLOAD_DIR / f"{safe_name}.part{i}"
+            with open(part_path, 'rb') as part_file:
+                raw = part_file.read()
+            try:
+                text = raw.decode('utf-8')
+            except UnicodeDecodeError:
+                text = raw.decode('utf-8', errors='replace')
+
+            lines = text.replace('\r\n', '\n').replace('\r', '\n').split('\n')
+            if lines and lines[-1] == '':
+                lines = lines[:-1]
+
+            if previous_tail is not None and lines and lines[0] == previous_tail:
+                lines = lines[1:]
+
+            if lines:
+                combined_lines.extend(lines)
+                previous_tail = lines[-1]
+
+            part_path.unlink()
+
+        with open(combined_path, 'w', encoding='utf-8', newline='') as f:
+            f.write('\n'.join(combined_lines) + ('\n' if combined_lines else ''))
+
         try:
             with open(combined_path, 'rb') as f:
                 result = uploader.upload(
@@ -727,24 +742,23 @@ def upload_chunk():
                 )
 
             file_url = result.get('secure_url')
-
-            # Store in MongoDB
             collection.insert_one({
                 'filename': filename,
                 'url': file_url,
                 'uploaded_at': datetime.utcnow()
             })
-
-            # Delete the combined local file
             combined_path.unlink()
             return jsonify({'status': 'ok', 'file_url': file_url}), 200
 
         except Exception as e:
+            app.logger.error('upload_chunk failure uploading/DB error: %s', e)
             return jsonify({'error': f'Cloudinary/DB error: {str(e)}'}), 500
 
     return jsonify({'status': 'chunk received', 'chunk': chunk_index}), 200
+
+
 if __name__ == "__main__":
     app.run(
-        host='0.0.0.0', 
+        host='0.0.0.0',
         port=int(os.environ.get("PORT", 5000))
     )
