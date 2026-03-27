@@ -666,6 +666,74 @@ def upload_csv():
 
     return jsonify({'error': 'No CSV data received or unsupported content type'}), 400
 
+from flask import request, jsonify
+from werkzeug.utils import secure_filename
+from pathlib import Path
+from datetime import datetime
+
+@app.route('/upload_chunk', methods=['POST'])
+def upload_chunk():
+    filename = request.form.get('filename')
+    chunk_index = int(request.form.get('chunk_index', -1))
+    total_chunks = int(request.form.get('total_chunks', -1))
+    chunk_data = request.files.get('chunk')
+
+    if not filename or chunk_index < 0 or total_chunks <= 0 or not chunk_data:
+        return jsonify({'error': 'Missing required parameters'}), 400
+
+    safe_name = secure_filename(filename)
+    UPLOAD_DIR.mkdir(exist_ok=True)
+
+    # Save chunk
+    temp_path = UPLOAD_DIR / f"{safe_name}.part{chunk_index}"
+    chunk_data.save(temp_path)
+
+    # Check all chunks received
+    all_parts_exist = all(
+        (UPLOAD_DIR / f"{safe_name}.part{i}").exists()
+        for i in range(total_chunks)
+    )
+
+    if all_parts_exist:
+        combined_path = UPLOAD_DIR / safe_name
+
+        with open(combined_path, 'wb') as combined_file:
+            for i in range(total_chunks):
+                part_path = UPLOAD_DIR / f"{safe_name}.part{i}"
+
+                with open(part_path, 'rb') as part_file:
+                    data = part_file.read()
+
+                    # ✅ FIX: Ensure newline between chunks
+                    if i != 0 and not data.startswith(b'\n'):
+                        combined_file.write(b'\n')
+
+                    combined_file.write(data.rstrip(b'\n'))
+
+                part_path.unlink()  # delete chunk
+
+        # Upload to Cloudinary
+        with open(combined_path, 'rb') as f:
+            result = uploader.upload(
+                f,
+                resource_type='raw',
+                public_id=safe_name,
+                overwrite=True
+            )
+
+        file_url = result.get('secure_url')
+
+        collection.insert_one({
+            'filename': filename,
+            'url': file_url,
+            'uploaded_at': datetime.utcnow()
+        })
+
+        combined_path.unlink()
+
+        return jsonify({'status': 'ok', 'file_url': file_url}), 200
+
+    return jsonify({'status': 'chunk received'}), 200
 if __name__ == "__main__":
     app.run(
         host='0.0.0.0', 
